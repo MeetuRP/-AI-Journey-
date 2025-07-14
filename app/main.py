@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from rag_chain import build_rag_chain
 import uvicorn
 
+
 app = FastAPI()
 
 #  Enable CORS for frontend requests
