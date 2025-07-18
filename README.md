@@ -146,4 +146,4 @@ npm start
 <li/>🎓 Integrated MCA @ LJ University  |
 <li/>💼 Intern at Mindsyncx Labs llt => Coginsun Infotech pvt ltd.  |
 <li/>💡 AI/ML Explorer |✏️ Sketch Artist  |
-- 🔗 [www.linkedin.com] (https://www.linkedin.com/in/meet-parmar-28jan2005/)
+<li/>🔗 https://www.linkedin.com/in/meet-parmar-28jan2005
