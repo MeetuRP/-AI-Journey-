@@ -5,7 +5,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_ollama import OllamaLLM
-from langchain.chains import RetrievalQA
+from langchain.chains import RetrievalQA 
 from langchain.prompts import PromptTemplate
 
 # Translator function using Google
