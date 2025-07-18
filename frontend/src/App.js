@@ -40,6 +40,7 @@ function App() {
         responseType: 'blob'
       });
 
+      // Create audio URL and play it
       const audioBlob = new Blob([ttsResponse.data], { type: 'audio/mpeg' });
       const audioURL = URL.createObjectURL(audioBlob);
       audioRef.current.src = audioURL;
