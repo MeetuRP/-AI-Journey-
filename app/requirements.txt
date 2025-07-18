@@ -6,3 +6,6 @@ langchain_huggingface
 langchain-ollama
 sentence-transformers
 faiss-cpu
+gtts
+deep-translator
+PyPDF2
