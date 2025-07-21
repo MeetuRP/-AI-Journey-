@@ -3,13 +3,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from gtts import gTTS
-from rag_chain import build_rag_chain
+from rag_chain import build_combined_rag_chain, translate_text
 import uvicorn
-
 
 app = FastAPI()
 
-# Enable CORS for frontend requests
+# CORS settings to allow frontend requests
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -18,13 +17,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Input model for POST request
+# Input format for /ask
 class Query(BaseModel):
     question: str
     lang: str = 'en'
-
-# Initialize RAG chain and translation
-qa_chain, translate_text = build_rag_chain()
 
 @app.get("/")
 def root():
@@ -34,14 +30,15 @@ def root():
 def ask_q(query: Query):
     print(f"🧠 Question received: {query.question} (lang: {query.lang})")
 
-    # Translate question to English
+    # 1. Translate incoming question to English
     translated_q = translate_text(query.question, source=query.lang, target='en')
 
-    # Get RAG-based answer
+    # 2. Build dynamic chain and get response
+    qa_chain = build_combined_rag_chain(translated_q)
     result = qa_chain.invoke(translated_q)
     answer = result["result"]
 
-    # Translate answer back to user's language
+    # 3. Translate answer back to original language
     translated_a = translate_text(answer, source='en', target=query.lang)
 
     return {
@@ -60,6 +57,6 @@ def text_to_speech(text: str, lang: str = "en"):
     tts.save(audio_path)
     return FileResponse(audio_path, media_type="audio/mpeg")
 
-# Start FastAPI server
+# Run the FastAPI app
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
