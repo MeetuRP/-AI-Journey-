@@ -13,8 +13,13 @@ from langchain_ollama import OllamaLLM  ---❌ Removed for Gemini
 from langchain_google_genai import ChatGoogleGenerativeAI  ❌ Removed for groq
 '''
 
-# Load environment variables from .env file
-load_dotenv()
+# ✅ Load .env from the current script's folder
+dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
+load_dotenv(dotenv_path=dotenv_path)
+# ✅ Confirm it's loading
+openai_api_key = os.getenv("GROQ_API_KEY")
+print(f"🔑 OPENAI_API_KEY loaded: {openai_api_key is not None}")
+
 
 # Translator
 def translate_text(text, source='auto', target='en'):
@@ -69,9 +74,9 @@ def build_combined_rag_chain(question: str):
     '''
     # Use Groq's LLM
     llm = ChatOpenAI(
-        model="llama3-70b-8192",  # or "llama3-70b-8192", etc.
+        model="llama3-70b-8192",
         base_url="https://api.groq.com/openai/v1",
-        api_key=os.getenv("GROQ_API_KEY")
+        openai_api_key=openai_api_key
     )
 
     # 6. Retriever with MMR
