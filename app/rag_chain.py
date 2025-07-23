@@ -94,3 +94,10 @@ def build_combined_rag_chain(question: str):
     )
 
     return rag_chain
+
+
+
+
+
+# app/.env
+# GROQ_API_KEY=REMOVED_SECRET
