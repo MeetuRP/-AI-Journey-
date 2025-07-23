@@ -1,3 +1,4 @@
+import os
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
@@ -6,11 +7,11 @@ from langchain.prompts import PromptTemplate
 from langchain.chains import RetrievalQA
 from deep_translator import GoogleTranslator
 from dotenv import load_dotenv
-# from langchain_ollama import OllamaLLM  # ❌ Removed for Gemini
 from langchain.chat_models import ChatOpenAI
-#from langchain_google_genai import ChatGoogleGenerativeAI
-import os
-
+'''
+from langchain_ollama import OllamaLLM  ---❌ Removed for Gemini
+from langchain_google_genai import ChatGoogleGenerativeAI  ❌ Removed for groq
+'''
 
 # Load environment variables from .env file
 load_dotenv()
@@ -57,7 +58,7 @@ def build_combined_rag_chain(question: str):
         input_variables=["context", "question"]
     )
 
-    # llm = OllamaLLM(model="gemma:2b")
+    '''llm = OllamaLLM(model="gemma:2b")'''
     # 5. Replace Ollama LLM with Gemini (ChatGoogleGenerativeAI)
     '''
     llm = ChatGoogleGenerativeAI(
