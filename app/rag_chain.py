@@ -51,14 +51,17 @@ def build_combined_rag_chain(question: str):
     # 4. Prompt template
     prompt_template = PromptTemplate(
         template=(
-            "You are a document analyst. Summarize or explain the document using this context:\n\n"
-            "{context}\n\nAnswer:"
+            "### Context:\n\n{context}\n\n"
+            "### Task:\nSummarize this document in Markdown bullet points with headers if applicable.\n\n"
+            "### Response:"
             if is_summary else
-            "You are a helpful assistant that only uses the provided document context to answer.\n\n"
-            "Answer the user's question accurately based on this context.\n\n"
-            "Context:\n{context}\n\nQuestion:\n{question}\n\n"
-            "If the answer is not in the context, say \"The context does not provide this information.\"\n\n"
-            "Be specific, include names, titles, financial values, or quotes if present."
+            "### Context:\n\n{context}\n\n"
+            "### Question:\n{question}\n\n"
+            "### Instructions:\n"
+            "- Answer only using the context above.\n"
+            "- If the answer is not in the context, respond with: `The context does not provide this information.`\n"
+            "- Format the answer in clean Markdown: use bullet points, headers, bold/italics where useful.\n\n"
+            "### Response:"
         ),
         input_variables=["context", "question"]
     )
@@ -94,10 +97,3 @@ def build_combined_rag_chain(question: str):
     )
 
     return rag_chain
-
-
-
-
-
-# app/.env
-# GROQ_API_KEY=REMOVED_SECRET

@@ -1,20 +1,23 @@
 import React, { useState, useRef } from 'react';
+import ReactMarkdown from 'react-markdown'; // To render Markdown-formatted bot responses
 import axios from 'axios';
 import './App.css';
 
 function App() {
+  // State for chat messages
   const [messages, setMessages] = useState([
-    { sender: 'bot', text: 'Hello! Ask me anything about AI concepts.' }
+    { sender: 'bot', text: 'Hello There! Ask me anything related to the PDF you\'ve given!' }
   ]);
+
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [recognizing, setRecognizing] = useState(false);
   const [language, setLanguage] = useState('en'); // 'en' = English, 'hi' = Hindi
 
-  const recognitionRef = useRef(null);
-  const audioRef = useRef(null);
+  const recognitionRef = useRef(null); // For speech-to-text recognition
+  const audioRef = useRef(null);       // For TTS audio playback
 
-  // Send question to FastAPI backend
+  // Sends user input to the FastAPI backend and handles response
   const handleSend = async (e) => {
     e.preventDefault();
     if (!input.trim()) return;
@@ -25,26 +28,27 @@ function App() {
     setLoading(true);
 
     try {
+      // 1. Send question and language to FastAPI
       const response = await axios.post('http://localhost:8000/ask', {
         question: input,
-        lang: language  // Send selected language
+        lang: language
       });
 
       const answer = response.data.answer;
-
       setMessages(msgs => [...msgs, { sender: 'bot', text: answer }]);
 
-      // Fetch voice from TTS endpoint
+      // 2. Request voice/audio from FastAPI using TTS
       const ttsResponse = await axios.get('http://localhost:8000/tts', {
         params: { text: answer, lang: language },
         responseType: 'blob'
       });
 
-      // Create audio URL and play it
+      // 3. Convert to audio and play
       const audioBlob = new Blob([ttsResponse.data], { type: 'audio/mpeg' });
       const audioURL = URL.createObjectURL(audioBlob);
       audioRef.current.src = audioURL;
       audioRef.current.play();
+
     } catch (err) {
       console.error(err);
       setMessages(msgs => [...msgs, { sender: 'bot', text: 'Error: Could not reach backend.' }]);
@@ -53,7 +57,7 @@ function App() {
     setLoading(false);
   };
 
-  // Start speech recognition
+  // Trigger speech-to-text recognition
   const startListening = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) return alert("Speech Recognition not supported");
@@ -70,6 +74,7 @@ function App() {
       setRecognizing(false);
     };
 
+    // Capture final recognized text and set it as input
     recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript;
       setInput(transcript);
@@ -80,29 +85,35 @@ function App() {
   };
 
   return (
-    <div className="App" style={{ background: '#181c20', minHeight: '100vh', color: '#fff' }}>
-      <h2 style={{ padding: '1rem' }}>AI Chatbot</h2>
+    <div className="App">
+      <h2>AI ChatBot</h2>
 
-      <div style={{ maxWidth: 600, margin: '0 auto', background: '#23272f', borderRadius: 8, padding: 24 }}>
-        
-        {/* Chat Display */}
-        <div style={{ maxHeight: 400, overflowY: 'auto', background: '#1a1d22', padding: 8, borderRadius: 6 }}>
+      <div className="chat-container">
+        {/* Chat display */}
+        <div className="chat-window">
           {messages.map((msg, idx) => (
-            <div key={idx} style={{
-              textAlign: msg.sender === 'user' ? 'right' : 'left',
-              margin: '8px 0',
-              color: msg.sender === 'user' ? '#7ecfff' : '#fff'
-            }}>
-              <span style={{ fontWeight: msg.sender === 'bot' ? 'bold' : 'normal' }}>
-                {msg.sender === 'bot' ? '🤖 ' : ''}{msg.text}
-              </span>
+            <div key={idx} className={`message ${msg.sender}`}>
+              {msg.sender === 'bot' ? (
+                <div className="bot-text">
+                  <strong>🤖</strong>
+                  <span className={`bot-markdown ${idx === 0 && msg.sender === 'bot' ? 'first-bot-message' : ''}`}>
+                    <ReactMarkdown children={msg.text} />
+                  </span>
+                </div>
+              ) : (
+                <div>
+                  {msg.text}
+                  <strong> 😁</strong>
+                </div>
+              )}
             </div>
           ))}
-          {loading && <div style={{ color: '#aaa' }}>Bot is typing...</div>}
+
+          {loading && <div className="loading">Bot is typing...</div>}
         </div>
 
-        {/* Language Dropdown */}
-        <div style={{ marginTop: 10 }}>
+        {/* Language selector */}
+        <div className="language-select">
           <label>🌐 Language: </label>
           <select value={language} onChange={e => setLanguage(e.target.value)}>
             <option value="en">English</option>
@@ -110,29 +121,31 @@ function App() {
           </select>
         </div>
 
-        {/* Input Field */}
-        <form onSubmit={handleSend} style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+        {/* Text input */}
+        <form onSubmit={handleSend} className="input-form">
           <input
             type="text"
             value={input}
             onChange={e => setInput(e.target.value)}
             placeholder="Type your question..."
-            style={{ flex: 1, padding: 10, borderRadius: 4, border: '1px solid #444', background: '#23272f', color: '#fff' }}
             disabled={loading}
           />
-          <button type="submit" disabled={loading || !input.trim()} style={{ padding: '0 18px' }}>
+          <button type="submit" disabled={loading || !input.trim()}>
             Send
           </button>
         </form>
 
-        {/* Voice Input Button */}
-        <button onClick={startListening} disabled={recognizing} style={{ marginTop: 10 }}>
-          {recognizing ? "🎙️ Listening..." : "🎤 Speak"}
-        </button>
+        {/* Speech-to-text button */}
+        <div className="speech-button">
+          <button onClick={startListening} disabled={recognizing}>
+            {recognizing ? "🎙️ Listening..." : "🎤 Speak"}
+          </button>
+        </div>
 
-        {/* Audio Playback */}
+        {/* TTS audio output */}
         <audio ref={audioRef} />
       </div>
+      <h6>Made with ❤️ by MeetParmar</h6>
     </div>
   );
 }
