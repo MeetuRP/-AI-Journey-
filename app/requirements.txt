@@ -9,5 +9,4 @@ faiss-cpu
 gtts
 deep-translator
 PyPDF2
-google-generative-ai
 pymongo
