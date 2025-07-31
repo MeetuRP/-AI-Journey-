@@ -8,32 +8,26 @@ from langchain.chains import RetrievalQA
 from deep_translator import GoogleTranslator
 from dotenv import load_dotenv
 from langchain.chat_models import ChatOpenAI
-'''
-from langchain_ollama import OllamaLLM  ---❌ Removed for Gemini
-from langchain_google_genai import ChatGoogleGenerativeAI  ❌ Removed for groq
-'''
 
-# ✅ Load .env from the current script's folder
+# ✅ Load .env variables (Groq key)
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 load_dotenv(dotenv_path=dotenv_path)
-# ✅ Confirm it's loading
 openai_api_key = os.getenv("GROQ_API_KEY")
 print(f"🔑 OPENAI_API_KEY loaded: {openai_api_key is not None}")
 
-
-# Translator
+# Translate text using GoogleTranslator
 def translate_text(text, source='auto', target='en'):
     return GoogleTranslator(source=source, target=target).translate(text)
 
-# Build RAG chain
-def build_combined_rag_chain(question: str):
-    pdf_path = "Press Release - INR.pdf"  # Change your static PDF path here
-    faiss_path = "faiss_index"
+# Build RAG chain based on question and dynamic PDF path
+def build_combined_rag_chain(question: str, pdf_path: str):
+    # FAISS path is tied to PDF path to support multiple sessions
+    faiss_path = f"faiss_index/{os.path.basename(pdf_path)}.faiss"
 
-    # 1. Embeddings
+    # 1. Load or create embeddings
     embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
-    # 2. Load or create vector DB
+    # 2. Vector DB creation or reuse
     if os.path.exists(faiss_path):
         vectordb = FAISS.load_local(faiss_path, embeddings, allow_dangerous_deserialization=True)
     else:
@@ -44,11 +38,11 @@ def build_combined_rag_chain(question: str):
         vectordb = FAISS.from_documents(chunks, embeddings)
         vectordb.save_local(faiss_path)
 
-    # 3. Detect if it's a summarization-type question
-    summary_keywords = ["summarize", "what is this pdf", "give me details", "explain", "summary", "overview", "highlights"]
+    # 3. Determine if it’s a summary-type query
+    summary_keywords = ["summarize", "overview", "explain", "highlight", "what is this pdf"]
     is_summary = any(kw in question.lower() for kw in summary_keywords)
 
-    # 4. Prompt template
+    # 4. Define prompt template
     prompt_template = PromptTemplate(
         template=(
             "### Context:\n\n{context}\n\n"
@@ -66,29 +60,20 @@ def build_combined_rag_chain(question: str):
         input_variables=["context", "question"]
     )
 
-    '''llm = OllamaLLM(model="gemma:2b")'''
-    # 5. Replace Ollama LLM with Gemini (ChatGoogleGenerativeAI)
-    '''
-    llm = ChatGoogleGenerativeAI(
-        model="gemini-pro",
-        temperature=0.2,
-        google_api_key="your_actual_gemini_api_key_here"
-    )
-    '''
-    # Use Groq's LLM
+    # 5. Initialize LLM (Groq’s LLaMA3)
     llm = ChatOpenAI(
         model="llama3-70b-8192",
         base_url="https://api.groq.com/openai/v1",
         openai_api_key=openai_api_key
     )
 
-    # 6. Retriever with MMR
+    # 6. Build retriever with Max Marginal Relevance
     retriever = vectordb.as_retriever(
         search_type="mmr",
         search_kwargs={"k": 12, "fetch_k": 15}
     )
 
-    # 7. Build chain
+    # 7. RAG pipeline using LangChain's RetrievalQA
     rag_chain = RetrievalQA.from_chain_type(
         llm=llm,
         retriever=retriever,

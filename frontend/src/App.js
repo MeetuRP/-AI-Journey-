@@ -1,63 +1,126 @@
-import React, { useState, useRef } from 'react';
-import ReactMarkdown from 'react-markdown'; // To render Markdown-formatted bot responses
+import React, { useState, useEffect, useRef } from 'react';
+import ReactMarkdown from 'react-markdown';
 import axios from 'axios';
 import './App.css';
 
 function App() {
-  // State for chat messages
-  const [messages, setMessages] = useState([
-    { sender: 'bot', text: 'Hello There! Ask me anything related to the PDF you\'ve given!' }
-  ]);
-
+  const [sessions, setSessions] = useState([]);
+  const [selectedSession, setSelectedSession] = useState('');
+  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [recognizing, setRecognizing] = useState(false);
-  const [language, setLanguage] = useState('en'); // 'en' = English, 'hi' = Hindi
+  const [language, setLanguage] = useState('en');
+  const recognitionRef = useRef(null);
+  const audioRef = useRef(null);
 
-  const recognitionRef = useRef(null); // For speech-to-text recognition
-  const audioRef = useRef(null);       // For TTS audio playback
+  useEffect(() => {
+    fetchSessions();
+  }, []);
 
-  // Sends user input to the FastAPI backend and handles response
+  const fetchSessions = async () => {
+    try {
+      const res = await axios.get('http://localhost:8000/sessions');
+      setSessions(res.data);
+    } catch (err) {
+      console.error("Failed to fetch sessions", err);
+    }
+  };
+
+  const fetchMessages = async (sessionId) => {
+    try {
+      const res = await axios.get(`http://localhost:8000/session/${sessionId}`);
+      setMessages(res.data.messages || []);
+    } catch (err) {
+      console.error("Failed to fetch session messages", err);
+    }
+  };
+
+  const stopAudioPlayback = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+  };
+
+  const handleSessionChange = (e) => {
+    stopAudioPlayback();
+    const sessionId = e.target.value;
+    setSelectedSession(sessionId);
+    if (sessionId) {
+      fetchMessages(sessionId);
+    } else {
+      setMessages([]);
+    }
+  };
+
+  const handleNewSession = async () => {
+    stopAudioPlayback();
+    const name = prompt("Enter session name:");
+    if (!name) return;
+
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = "application/pdf";
+
+    fileInput.onchange = async () => {
+      const file = fileInput.files[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append('session_name', name);
+      formData.append('pdf_file', file);
+
+      try {
+        const res = await axios.post('http://localhost:8000/create-session', formData);
+        await fetchSessions();
+        setSelectedSession(res.data.session_id);
+        setMessages([]);
+      } catch (err) {
+        console.error("Failed to create session", err);
+      }
+    };
+
+    fileInput.click();
+  };
+
   const handleSend = async (e) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    if (!input.trim() || !selectedSession) return;
+
+    stopAudioPlayback();
 
     const userMessage = { sender: 'user', text: input };
-    setMessages(msgs => [...msgs, userMessage]);
+    setMessages((msgs) => [...msgs, userMessage]);
     setInput('');
     setLoading(true);
 
     try {
-      // 1. Send question and language to FastAPI
-      const response = await axios.post('http://localhost:8000/ask', {
+      const res = await axios.post(`http://localhost:8000/ask/${selectedSession}`, {
         question: input,
-        lang: language
+        lang: language,
       });
 
-      const answer = response.data.answer;
-      setMessages(msgs => [...msgs, { sender: 'bot', text: answer }]);
+      const answer = res.data.answer;
+      setMessages((msgs) => [...msgs, { sender: 'bot', text: answer }]);
 
-      // 2. Request voice/audio from FastAPI using TTS
-      const ttsResponse = await axios.get('http://localhost:8000/tts', {
+      const ttsRes = await axios.get('http://localhost:8000/tts', {
         params: { text: answer, lang: language },
-        responseType: 'blob'
+        responseType: 'blob',
       });
 
-      // 3. Convert to audio and play
-      const audioBlob = new Blob([ttsResponse.data], { type: 'audio/mpeg' });
+      const audioBlob = new Blob([ttsRes.data], { type: 'audio/mpeg' });
       const audioURL = URL.createObjectURL(audioBlob);
       audioRef.current.src = audioURL;
       audioRef.current.play();
-
     } catch (err) {
       console.error(err);
-      setMessages(msgs => [...msgs, { sender: 'bot', text: 'Error: Could not reach backend.' }]);
+      setMessages((msgs) => [...msgs, { sender: 'bot', text: 'Error: Could not reach backend.' }]);
     }
 
     setLoading(false);
   };
 
-  // Trigger speech-to-text recognition
   const startListening = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) return alert("Speech Recognition not supported");
@@ -74,7 +137,6 @@ function App() {
       setRecognizing(false);
     };
 
-    // Capture final recognized text and set it as input
     recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript;
       setInput(transcript);
@@ -86,10 +148,22 @@ function App() {
 
   return (
     <div className="App">
-      <h2>AI ChatBot</h2>
+      <h2>🧠 AI ChatBot with Sessions</h2>
+
+      <div className="session-controls">
+        <label>📂 Chat Session:</label>
+        <select value={selectedSession} onChange={handleSessionChange}>
+          <option value="">-- Select a session --</option>
+          {sessions.map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.name}
+            </option>
+          ))}
+        </select>
+        <button onClick={handleNewSession}>➕ New Session</button>
+      </div>
 
       <div className="chat-container">
-        {/* Chat display */}
         <div className="chat-window">
           {messages.map((msg, idx) => (
             <div key={idx} className={`message ${msg.sender}`}>
@@ -97,7 +171,7 @@ function App() {
                 <div className="bot-text">
                   <strong>🤖</strong>
                   <span className={`bot-markdown ${idx === 0 && msg.sender === 'bot' ? 'first-bot-message' : ''}`}>
-                    <ReactMarkdown children={msg.text} />
+                    <ReactMarkdown>{msg.text}</ReactMarkdown>
                   </span>
                 </div>
               ) : (
@@ -108,43 +182,42 @@ function App() {
               )}
             </div>
           ))}
-
           {loading && <div className="loading">Bot is typing...</div>}
         </div>
 
-        {/* Language selector */}
         <div className="language-select">
-          <label>🌐 Language: </label>
-          <select value={language} onChange={e => setLanguage(e.target.value)}>
+          <label>🌐 Language:</label>
+          <select value={language} onChange={(e) => setLanguage(e.target.value)}>
             <option value="en">English</option>
             <option value="hi">Hindi</option>
           </select>
         </div>
 
-        {/* Text input */}
         <form onSubmit={handleSend} className="input-form">
           <input
             type="text"
             value={input}
-            onChange={e => setInput(e.target.value)}
+            onChange={(e) => {
+              stopAudioPlayback();
+              setInput(e.target.value);
+            }}
             placeholder="Type your question..."
-            disabled={loading}
+            disabled={loading || !selectedSession}
           />
-          <button type="submit" disabled={loading || !input.trim()}>
+          <button type="submit" disabled={loading || !input.trim() || !selectedSession}>
             Send
           </button>
         </form>
 
-        {/* Speech-to-text button */}
         <div className="speech-button">
-          <button onClick={startListening} disabled={recognizing}>
-            {recognizing ? "🎙️ Listening..." : "🎤 Speak"}
+          <button onClick={startListening} disabled={recognizing || !selectedSession}>
+            {recognizing ? '🎙️ Listening...' : '🎤 Speak'}
           </button>
         </div>
 
-        {/* TTS audio output */}
         <audio ref={audioRef} />
       </div>
+
       <h6>Made with ❤️ by MeetParmar</h6>
     </div>
   );
