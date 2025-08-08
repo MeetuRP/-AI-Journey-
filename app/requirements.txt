@@ -10,3 +10,8 @@ gtts
 deep-translator
 PyPDF2
 pymongo
+python-docx
+pandas
+python-dotenv
+firecrawl
+langchain_openai
