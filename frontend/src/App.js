@@ -12,6 +12,9 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [recognizing, setRecognizing] = useState(false);
   const [language, setLanguage] = useState('en');
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
+
   const recognitionRef = useRef(null);
   const audioRef = useRef(null);
   const chatEndRef = useRef(null);
@@ -43,9 +46,8 @@ function App() {
     }
   };
 
-  const handleSessionChange = (e) => {
+  const handleSessionChange = (id) => {
     stopAudio();
-    const id = e.target.value;
     setSelectedSession(id);
     if (id) fetchMessages(id);
     else setMessages([]);
@@ -78,6 +80,7 @@ function App() {
       }
     };
     input.click();
+    setShowMoreMenu(false);
   };
 
   const handleScrapeToSession = async () => {
@@ -96,12 +99,11 @@ function App() {
       console.error(err);
       alert(`❌ Failed to scrape: ${err.response?.data?.detail || "Unknown error"}`);
     }
+    setShowMoreMenu(false);
   };
 
   const formatBotText = (text) => {
     if (!text) return '';
-
-    // First sentence (ends with ., ?, ! or ,)
     const match = text.match(/^.*?[.?!,](\s|$)/);
     if (match) {
       const firstSentence = match[0].trim();
@@ -170,48 +172,81 @@ function App() {
   };
 
   return (
-    <div className="App">
-      <h2>--AI ChatBot--</h2>
-
-      <div className="session-controls">
-        <label>📂 Session:</label>
-        <select value={selectedSession} onChange={handleSessionChange}>
-          <option value="">-- Select --</option>
+    <div className="app-container">
+      {/* Sidebar */}
+      <div className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
+        <div className="sidebar-header">
+          <button className="new-session-btn" onClick={handleNewSession}><b>New Session ➕</b></button>
+        </div>
+        <div className="session-list">
           {sessions.map(s => (
-            <option key={s.id} value={s.id}>{s.name}</option>
-          ))}
-        </select>
-        <button onClick={handleNewSession}>➕ New Session</button>
-        <button onClick={handleFileUpload}>📄 Upload File</button>
-        <button onClick={handleScrapeToSession}>🔗 Scrape to Session</button>
-      </div>
-
-      <div className="chat-container">
-        <div className="chat-window">
-          {messages.map((msg, i) => (
-            <div key={i} className={`message ${msg.sender}`}>
-              {msg.sender === 'bot' ? (
-                <ReactMarkdown rehypePlugins={[rehypeRaw]}>
-                  {`🤖: ${formatBotText(msg.text)}`}
-                </ReactMarkdown>
-              ) : (
-                <ReactMarkdown>{`${msg.text} :😁`}</ReactMarkdown>
-              )}
+            <div
+              key={s.id}
+              className={`session-item ${selectedSession === s.id ? 'active' : ''}`}
+              onClick={() => handleSessionChange(s.id)}
+            >
+              {s.name}
             </div>
           ))}
-          {loading && <div className="loading">Bot is thinking...</div>}
+        </div>
+      </div>
+
+      {/* Chat area */}
+      <div className="chat-main">
+        {/* Header */}
+        <div className="chat-header">
+          <button className="sidebar-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
+            {sidebarOpen ? '☰' : '|||'}
+          </button>
+          <div className="header-info">
+            <h2>--AI ChatBot--</h2>
+          </div>
+          {/* Language selector */}
+          <div className="language-selector">
+            <label>🌐:</label>
+            <select value={language} onChange={(e) => setLanguage(e.target.value)}>
+              <option value="en">English</option>
+              <option value="hi">Hindi</option>
+            </select>
+          </div>
+          <div className="msg-count">💬 {messages.length}</div>
+        </div>
+
+        {/* Messages */}
+        <div className="chat-messages">
+          {messages.map((msg, index) => (
+            <div
+              key={index}
+              className={`message-row ${msg.sender === "user" ? "user" : "bot"}`}
+            >
+              <div className={`message-bubble ${msg.sender === "user" ? "user-bubble" : "bot-bubble"}`}>
+                {msg.sender === "bot" ? (
+                  <ReactMarkdown rehypePlugins={[rehypeRaw]}>
+                    {`🤖: ${formatBotText(msg.text)}`}
+                  </ReactMarkdown>
+                ) : (
+                  <ReactMarkdown>{`${msg.text} :😁`}</ReactMarkdown>
+                )}
+              </div>
+            </div>
+          ))}
+
+          {/* AI typing indicator */}
+          {loading && (
+            <div className="message-bubble bot typing-indicator">
+              <span className="typing-text">AI is thinking</span>
+              <span className="dot"></span>
+              <span className="dot"></span>
+              <span className="dot"></span>
+            </div>
+          )}
+
           <div ref={chatEndRef} />
         </div>
 
-        <div className="language-select">
-          <label>🌐 Language:</label>
-          <select value={language} onChange={(e) => setLanguage(e.target.value)}>
-            <option value="en">English</option>
-            <option value="hi">Hindi</option>
-          </select>
-        </div>
-
-        <form onSubmit={handleSend} className="input-form">
+        {/* Input area */}
+        <form className="chat-input-area" onSubmit={handleSend}>
+         
           <input
             type="text"
             value={input}
@@ -219,21 +254,30 @@ function App() {
               stopAudio();
               setInput(e.target.value);
             }}
-            placeholder="Ask something..."
+            placeholder="Type your message..."
           />
-          <button type="submit" disabled={!input.trim() || !selectedSession}>Send</button>
+          <div className="input-buttons">
+            <button type="button" onClick={startListening} disabled={recognizing || !selectedSession}>
+              {recognizing ? '🎙️' : '🎤'}
+            </button>
+            <div className="more-menu-container">
+              <button type="button" onClick={() => setShowMoreMenu(!showMoreMenu)}>🔼</button>
+              {showMoreMenu && (
+                <div className="more-menu">
+                  <button onClick={handleFileUpload}><b>📄 Upload File</b></button>
+                  <button onClick={handleScrapeToSession}><b>🔗 Scraping web</b></button>
+                </div>
+              )}
+            </div>
+            <button type="submit" disabled={!input.trim() || !selectedSession} className="send-button"><b>SEND</b></button>
+          </div>
+
         </form>
 
-        <div className="speech-button">
-          <button onClick={startListening} disabled={recognizing || !selectedSession}>
-            {recognizing ? '🎙️ Listening...' : '🎤 Speak'}
-          </button>
-        </div>
+
 
         <audio ref={audioRef} />
       </div>
-
-      <h6>Made with ❤️ by MeetParmar</h6>
     </div>
   );
 }
