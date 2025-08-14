@@ -9,7 +9,7 @@
   background: white;
   border-right: 1px solid #ddd;
   width: 250px;
-  transition: width 0.3s ease;
+  transition: width 0.2s ease;
   overflow: hidden;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -66,22 +66,69 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 .sidebar-toggle {
-  background: none;
   border: none;
-  font-size: 1.2rem;
+  background: #f3f4f6;
+  padding: 0.4rem 1rem;
+  border-radius: 8px;
   cursor: pointer;
 }
 .header-info {
   flex: 1;
   margin-left: 1rem;
 }
-.lang-info {
-  display: block;
-  font-size: 0.8rem;
-  color: #666;
+/* Language dropdown styled like More Menu */
+.language-selector-container {
+  position: relative;
+}
+
+.language-selector-btn {
+  border: none;
+  background: #f3f4f6;
+  padding: 0.4rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.language-selector-btn:hover {
+  background: #dbeafe;
+}
+
+.language-dropdown {
+  position: absolute;
+  bottom:  0%;
+  right: 0;
+  background: #eff6ff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0px 2px 8px rgba(0,0,0,0.15);
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  width: 120px;
+}
+
+.language-dropdown select {
+  width: 100%;
+  padding: 0.3rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: white;
+  cursor: pointer;
+}
+.language-dropdown select:hover {
+  background: #dbeafe;
 }
 .msg-count {
   font-size: 0.9rem;
+}
+
+.msg-count button {
+  border: none;
+  background: #f3f4f6;
+  padding: 0.4rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
 }
 
 /* Messages */
@@ -97,14 +144,66 @@
   margin-bottom: 0.6rem;
   line-height: 1.4;
 }
+.message-bubble h1,
+.message-bubble h2,
+.message-bubble h3,
+.message-bubble h4,
+.message-bubble h5,
+.message-bubble h6 {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  font-size: 1rem; /* same as normal text */
+  font-weight: bold;
+}
+
 .message-bubble.user {
   background: linear-gradient(90deg, #4a90e2, #357abd);
   color: white;
   margin-left: auto;
+
 }
 .message-bubble.bot {
   background: white;
   border: 1px solid #ddd;
+}
+
+/* Remove extra space in markdown paragraphs & tables */
+.message-bubble p {
+  margin: 0 !important;
+}
+
+/* Collapse runs of <br> in markdown output */
+.message-bubble br + br {
+  display: none;
+}
+
+/* Remove top/bottom gap from first & last markdown block in bubble */
+.message-bubble > :first-child { margin-top: 10px !important; }
+.message-bubble > :last-child  { margin-bottom: 10px !important; }
+
+/* NEW: Remove margin from element before a table */
+.message-bubble *:has(+ table) {
+  margin-bottom: 0 !important;
+}
+
+/* Table styling for bot responses */
+.message-bubble table {
+  margin-top: -105em !important;
+  margin-bottom: 0 !important;
+  border-collapse: collapse;
+  background: white;
+}
+
+.message-bubble table th,
+.message-bubble table td {
+  border: 1px solid #ccc;
+  padding: 6px 10px;
+  text-align: left;
+}
+
+.message-bubble table th {
+  background: #f3f4f6;
+  font-weight: bold;
 }
 
 /* Typing indicator */
@@ -156,7 +255,7 @@
   display: flex;
   align-items: center;
   gap: 0.3rem;
-  padding: 0.4rem 1rem;;
+  padding: 0.4rem 1rem;
   font-family: 'Roboto', sans-serif;
   color: #000000;
 }
@@ -170,24 +269,21 @@
 .input-buttons button:hover {
   background: #dbeafe;
 }
-/* base style for the SEND button */
+/* SEND button */
 .input-buttons .send-button {
   background: #eff6ff;
   color: #0b3a75;
   transition: background 0.2s ease, color 0.2s ease, transform 0.08s ease;
 }
-
-/* make the whole SEND button change color on hover */
 .input-buttons .send-button:hover {
   background: #1f549a;
   color: #fff;
-  transform: scale(1.02); /* optional subtle feedback */
+  transform: scale(1.02);
 }
-
-/* ensure any bold text inherits the color */
 .input-buttons .send-button b {
   color: inherit;
 }
+
 /* More Menu */
 .more-menu-container {
   position: relative;
@@ -196,8 +292,9 @@
   position: absolute;
   bottom: 120%;
   right: -70px;
-  background: white;
+  background: #eff6ff;
   border: 1px solid #ddd;
+  font-style: #1f549a;
   border-radius: 10px;
   box-shadow: 0px 2px 8px rgba(0,0,0,0.15);
   padding: 1rem;
@@ -212,12 +309,13 @@
   padding: 0.4rem 0.6rem;
   text-align: left;
   cursor: pointer;
+  background: #eff6ff;
+  color: #0b3a75;
   transition: background 0.1s ease, color 0.2s ease, transform 0.08s ease;
 }
 .more-menu button:hover {
   background: #1f549a;
-  color: white;
-  transition: background 0.1s ease, color 0.2s ease, transform 0.08s ease;
+  color: rgb(255, 255, 255);
 }
 
 /* Language selector */
@@ -234,15 +332,12 @@
   display: flex;
   margin-bottom: 8px;
 }
-
 .message-row.user {
   justify-content: flex-end;
 }
-
 .message-row.bot {
   justify-content: flex-start;
 }
-
 .message-bubble {
   max-width: 70%;
   padding: 8px 12px;
@@ -250,13 +345,29 @@
   white-space: pre-wrap;
   word-wrap: break-word;
 }
+.message-bubble p {
+  margin: 0 !important;
+}
+.message-bubble ul {
+  list-style-type: disc;
+  margin-left: 20px;
+}
+.message-bubble ol {
+  list-style-type: decimal;
+  margin-left: 20px;
+}
+.message-bubble li {
+  margin: 0 !important;
+}
 
 .user-bubble {
-  background: #2563eb;
+  background: #5894da;
   color: white;
+  box-shadow: -10px 0px 10px 1px rgba(0, 0, 0, 0.1);
 }
-
 .bot-bubble {
-  background: #e5e7eb;
+  background: #e8f5ed;
   color: black;
+  box-shadow: 10px 0px 10px -1px rgba(0, 0, 0, 0.1);
 }
+/*6894f4*/

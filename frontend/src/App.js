@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import axios from 'axios';
 import './App.css';
@@ -104,6 +105,15 @@ function App() {
 
   const formatBotText = (text) => {
     if (!text) return '';
+
+    // Remove markdown headings
+    text = text.replace(/^#+\s+/gm, '');
+    // Collapse multiple blank lines outside tables
+    // text = text.replace(/([^\S\r\n]*\n){2,}/g, '\n');
+
+    // Trim leading/trailing spaces inside table rows
+    text = text.replace(/^\s*\|(.+)\|\s*$/gm, (line) => line.trim());
+
     const match = text.match(/^.*?[.?!,](\s|$)/);
     if (match) {
       const firstSentence = match[0].trim();
@@ -112,6 +122,10 @@ function App() {
     }
     return `<span class="highlight">${text}</span>`;
   };
+
+
+
+
 
   const handleSend = async (e) => {
     e.preventDefault();
@@ -196,7 +210,7 @@ function App() {
         {/* Header */}
         <div className="chat-header">
           <button className="sidebar-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
-            {sidebarOpen ? '☰' : '|||'}
+            {sidebarOpen ? '|||' : '☰'}
           </button>
           <div className="header-info">
             <h2>--AI ChatBot--</h2>
@@ -209,7 +223,7 @@ function App() {
               <option value="hi">Hindi</option>
             </select>
           </div>
-          <div className="msg-count">💬 {messages.length}</div>
+          <div className="msg-count"><button>💬 {messages.length}</button></div>
         </div>
 
         {/* Messages */}
@@ -221,7 +235,7 @@ function App() {
             >
               <div className={`message-bubble ${msg.sender === "user" ? "user-bubble" : "bot-bubble"}`}>
                 {msg.sender === "bot" ? (
-                  <ReactMarkdown rehypePlugins={[rehypeRaw]}>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
                     {`🤖: ${formatBotText(msg.text)}`}
                   </ReactMarkdown>
                 ) : (
@@ -246,7 +260,6 @@ function App() {
 
         {/* Input area */}
         <form className="chat-input-area" onSubmit={handleSend}>
-         
           <input
             type="text"
             value={input}
@@ -271,10 +284,7 @@ function App() {
             </div>
             <button type="submit" disabled={!input.trim() || !selectedSession} className="send-button"><b>SEND</b></button>
           </div>
-
         </form>
-
-
 
         <audio ref={audioRef} />
       </div>
