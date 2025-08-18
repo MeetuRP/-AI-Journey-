@@ -13,6 +13,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [recognizing, setRecognizing] = useState(false);
   const [language, setLanguage] = useState('en');
+  const [showLangMenu, setShowLangMenu] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
 
@@ -124,9 +125,6 @@ function App() {
   };
 
 
-
-
-
   const handleSend = async (e) => {
     e.preventDefault();
     if (!input.trim() || !selectedSession) return;
@@ -215,13 +213,25 @@ function App() {
           <div className="header-info">
             <h2>--AI ChatBot--</h2>
           </div>
-          {/* Language selector */}
-          <div className="language-selector">
-            <label>🌐:</label>
-            <select value={language} onChange={(e) => setLanguage(e.target.value)}>
-              <option value="en">English</option>
-              <option value="hi">Hindi</option>
-            </select>
+          {/* Language Selector */}
+          <div className="language-menu-container">
+            <button
+              type="button"
+              className="language-toggle"
+              onClick={() => setShowLangMenu(!showLangMenu)}
+            >
+              🌐
+            </button>
+            {showLangMenu && (
+              <div className="language-menu">
+                <button onClick={() => { setLanguage('en'); setShowLangMenu(false); }}>
+                  <><b>English</b></>
+                </button>
+                <button onClick={() => { setLanguage('hi'); setShowLangMenu(false); }}>
+                  <><b>Hindi</b></>
+                </button>
+              </div>
+            )}
           </div>
           <div className="msg-count"><button>💬 {messages.length}</button></div>
         </div>
