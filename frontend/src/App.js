@@ -225,10 +225,10 @@ function App() {
             {showLangMenu && (
               <div className="language-menu">
                 <button onClick={() => { setLanguage('en'); setShowLangMenu(false); }}>
-                  <><b>English</b></>
+                  <b>English</b>
                 </button>
                 <button onClick={() => { setLanguage('hi'); setShowLangMenu(false); }}>
-                  <><b>Hindi</b></>
+                  <b>Hindi</b>
                 </button>
               </div>
             )}
