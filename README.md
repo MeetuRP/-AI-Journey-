@@ -1,6 +1,6 @@
 🧠 AI Chatbot with RAG, Voice Input, Web Scraping & Hindi/English Support
 
-This project is an intelligent, voice-enabled AI chatbot that uses Retrieval-Augmented Generation (RAG) with FastAPI + LangChain + Groq LLaMA3 + FAISS in the backend and React.js in the frontend.
+This project is an intelligent, voice-enabled chatbot that uses Retrieval-Augmented Generation (RAG) with FastAPI + LangChain + Groq LLaMA3 + FAISS in the backend and React.js in the frontend.
 
 It supports:
 
@@ -10,46 +10,46 @@ It supports:
 
 📑 Upload custom files (PDF, DOC, DOCX, TXT, CSV)
 
-🔗 Scrape live web pages as knowledge source
+🔗 Scrape live web pages into a session as knowledge source
 
 🌐 English and Hindi language selection
 
-🔊 Text-to-Speech with interrupt support
+🔊 Text-to-Speech using gTTS (with interrupt on new input)
 
-🧠 Context-aware answers from documents & web content
+🧠 Context-aware answers using uploaded files or scraped content
 
-🔁 Automatic translation (Hindi ⇄ English)
+🔁 Automatic translation using deep-translator (Hindi ⇄ English)
 
 🚀 Features
 Feature	Description
 🗃️ Retrieval-Augmented Generation	Answers are based only on facts retrieved from uploaded files or scraped web pages.
-🧠 Session-based Memory	Each session is stored in MongoDB and remembers conversation history.
-📂 Custom File Upload	Upload your own PDF, DOC/DOCX, TXT, or CSV for each session.
-🔗 Web Scraping	Add live content by scraping a website URL (via Firecrawl + BeautifulSoup fallback).
-🎙️ Voice Assistant	Ask via voice input using browser’s Speech Recognition API.
-🔊 Spoken Responses	Bot’s answers are spoken aloud with gTTS (interrupts if new question is asked).
-🌐 Language Switcher	Switch between Hindi and English for both input and output.
-🔁 Translation	Automatically translates Hindi queries to English before RAG, and translates answers back.
-🤖 Powered by LLM + Groq	Uses LLaMA3-70B via Groq API for blazing-fast inference.
+🧠 Session-based Memory	Each session is stored in MongoDB and remembers the conversation history.
+📂 Multi-File Support	Upload PDF, DOC, DOCX, TXT, or CSV files to personalize the knowledge base.
+🔗 Web Scraping	Add knowledge dynamically by scraping any URL (via Firecrawl + BeautifulSoup fallback).
+🎙️ Voice Assistant	Ask questions via voice input using browser's built-in Speech Recognition API.
+🔊 Spoken Responses	Bot’s answers are spoken aloud using gTTS and can be stopped on new action.
+🌐 Language Switcher	Choose between Hindi and English — works for both input and output.
+🔁 Translation	Uses deep-translator for Hindi ⇄ English conversion.
 🎨 Modern UI	Sidebar sessions, collapsible menus, typing indicator, Markdown tables & formatting.
+🤖 Powered by LLM + Groq	Uses LLaMA3-70B via Groq API for blazing-fast cloud inference.
 📂 Project Structure
 AI_agent/
 ├── app/
-│   ├── main.py             # FastAPI backend (chat, TTS, upload, scrape endpoints)
+│   ├── main.py             # FastAPI backend with /ask, /tts, session, upload, scrape endpoints
 │   ├── rag_chain.py        # RAG setup using LangChain + FAISS + Groq LLaMA3
 │   ├── db.py               # MongoDB session management
 │   ├── firecrawl_utils.py  # Web scraping (Firecrawl + BeautifulSoup fallback)
-│   ├── uploads/            # Uploaded files (ignored in Git)
+│   ├── uploads/            # User-uploaded files (ignored in Git)
 ├── frontend/
 │   ├── src/
-│   │   ├── App.js          # React app (UI, voice, TTS, sessions, scraping)
-│   │   ├── App.css         # Modern styled chat UI
+│   │   ├── App.js          # React app with voice input, translation, TTS, sessions, scraping
+│   │   ├── App.css         # Chat UI styles (dark mode, Markdown formatting, sidebar)
 │   ├── package.json        # Frontend dependencies
 ├── .env                    # Environment config (Groq, MongoDB, Firecrawl keys)
 ├── requirements.txt        # Backend dependencies
 
 🛠️ Setup Instructions
-🔧 Backend (FastAPI + LangChain + MongoDB + gTTS)
+🔧 Backend (FastAPI + LangChain + gTTS + MongoDB)
 
 Install Python dependencies:
 
@@ -62,27 +62,34 @@ fastapi
 
 uvicorn
 
-langchain, langchain-community
+langchain
 
-faiss-cpu, sentence-transformers
+langchain-community
 
-gtts, deep-translator
+langchain-ollama
+
+faiss-cpu
+
+gtts
+
+deep-translator
 
 pymongo
 
-firecrawl (API for scraping)
-
 PyPDF2, python-docx, pandas
 
-Add your .env:
+firecrawl
 
+Add your .env file in root:
+
+# .env
 GROQ_API_KEY=your_groq_api_key
 MONGO_URI=mongodb://localhost:27017
 MONGO_DB_NAME=chatbotDB
 FIRECRAWL_API_KEY=your_firecrawl_api_key
 
 
-Start FastAPI:
+Start FastAPI server:
 
 python main.py
 
@@ -91,7 +98,7 @@ Make sure MongoDB is running and uploads/ folder exists.
 
 🌐 Frontend (React.js)
 
-Move into frontend:
+Go to the frontend folder:
 
 cd frontend
 
@@ -101,39 +108,39 @@ Install dependencies:
 npm install
 
 
-Start React app:
+Start the app:
 
 npm start
 
 🧠 Technologies Used
 Area	Tool/Library
 Backend Server	FastAPI
-AI Model	LLaMA3-70B (Groq API)
+AI Model	LLaMA3-70B (via Groq API)
 RAG Framework	LangChain + FAISS
 Embeddings	sentence-transformers (MiniLM)
-PDF/Doc/CSV/TXT Loading	PyPDFLoader, TextLoader, CSVLoader, DocxLoader
+File Loading	PyPDFLoader, TextLoader, CSVLoader, DocxLoader
 Web Scraping	Firecrawl API + BeautifulSoup fallback
-Text-to-Speech	gTTS (interrupt support)
+Text-to-Speech (TTS)	gTTS (with interrupt feature)
 Translation	deep-translator
 Session Storage	MongoDB
-Voice Input	Web Speech API
-Frontend	React.js + Axios + ReactMarkdown (with tables support)
+Speech Recognition	Web Speech API
+Frontend	React.js + Axios + ReactMarkdown (with tables)
 🧪 Example Prompts
-English	Hindi
+English Questions	Hindi Voice/Text Questions
 What is RAG?	RAG क्या है?
-Summarize this PDF	इस PDF का सारांश बताइए
 What is an AI Agent?	AI एजेंट क्या होता है?
 Applications of LangChain?	LangChain के उपयोग क्या हैं?
-Scrape this link and summarize it: https://example.com	इस वेबसाइट का सारांश बताओ: https://example.com
+Summarize this PDF	इस PDF का सारांश बताइए
+Scrape this link and summarize: https://example.com	इस वेबसाइट का सारांश बताइए: https://example.com
 ⚠️ Known Limitations
 
-🎤 Speech recognition accuracy varies, especially for Hindi technical words (e.g., “LLM” → “IIM”).
+⚠️ Speech recognition accuracy varies — tech terms in Hindi like “LLM” may be misheard as “IIM”.
 
-🔊 gTTS delay: short pause while generating audio, though playback interruption works smoothly.
+📢 gTTS has a short delay during audio generation (but stops instantly if interrupted).
 
-📑 Only one source per session: uploading a new file or scraping a link replaces the old context (planned improvement: multi-source support).
+📑 Only one source per session — uploading a new file or scraping a new link replaces the old context (future upgrade: multi-source support).
 
-🔒 No authentication yet — all sessions are public.
+🔒 No authentication yet — all sessions are publicly accessible.
 
 🙏 Acknowledgements
 
@@ -143,7 +150,7 @@ Groq API
 
 FAISS
 
-gTTS
+gTTS (Google Text-to-Speech)
 
 Deep Translator
 
@@ -152,7 +159,5 @@ Firecrawl
 👤 Author
 
 Meet Parmar
-🎓 Integrated MCA @ LJ University
-💼 Intern at Mindsyncx Labs → Coginsun Infotech Pvt Ltd.
-💡 AI/ML Explorer | ✏️ Sketch Artist
-🔗 https://www.linkedin.com/in/meet-parmar-28jan2005
+
+<li/>🎓 Integrated MCA @ LJ University | <li/>💼 Intern at Mindsyncx Labs → Coginsun Infotech Pvt Ltd. | <li/>💡 AI/ML Explorer | ✏️ Sketch Artist | <li/>🔗 https://www.linkedin.com/in/meet-parmar-28jan2005
