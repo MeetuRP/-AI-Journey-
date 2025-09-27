@@ -1,3 +1,72 @@
+/* ✅ 1. Define color variables for both modes */
+:root {
+  /* Light Mode (Default) */
+  --bg-main: #f0f2f5;
+  --bg-sidebar: white;
+  --bg-header: white;
+  --bg-input-area: white;
+  --bg-chat-messages: transparent;
+  --bg-button: #f3f4f6;
+  --bg-button-hover: #dbeafe;
+  --bg-session-item-hover: #f0f0f0;
+  --bg-session-item-active: #dbeafe;
+  --bg-user-bubble: #5894da;
+  --bg-bot-bubble: #e8f5ed;
+  --bg-menu: #eff6ff;
+  --bg-menu-hover: #1f549a;
+  --bg-send-button: #eff6ff;
+  --bg-send-button-hover: #1f549a;
+
+  --text-main: black;
+  --text-light: white;
+  --text-typing: #555;
+  --text-menu: #0b3a75;
+  --text-menu-hover: white;
+  --text-send-button: #0b3a75;
+  --text-send-button-hover: #fff;
+  
+  --border-color: #ddd;
+  --border-color-input: #d1d5db;
+  --border-color-header: #eee;
+  
+  --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+.dark-mode {
+  /* Dark Mode */
+  --bg-main: #1a202c;
+  --bg-sidebar: #2d3748;
+  --bg-header: #2d3748;
+  --bg-input-area: #2d3748;
+  --bg-chat-messages: #1a202c;
+  --bg-button: #4a5568;
+  --bg-button-hover: #718096;
+  --bg-session-item-hover: #4a5568;
+  --bg-session-item-active: #1e293b;
+  --bg-user-bubble: #3b82f6;
+  --bg-bot-bubble: #4a5568;
+  --bg-menu: #1e293b;
+  --bg-menu-hover: #3b82f6;
+  --bg-send-button: #4a5568;
+  --bg-send-button-hover: #3b82f6;
+
+  --text-main: #e2e8f0;
+  --text-header-info: #edf2f7;
+  --text-light: #ffffff;
+  --text-typing: #cbd5e1;
+  --text-menu: #93c5fd;
+  --text-menu-hover: #ffffff;
+  --text-send-button: #e2e8f0;
+  --text-send-button-hover: #fff;
+
+  --border-color: #4a5568;
+  --border-color-input: #4a5568;
+  --border-color-header: #4a5568;
+
+  --shadow-color: rgba(0, 0, 0, 0.4);
+}
+
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -9,6 +78,10 @@ body {
   /* Hide scrollbar but allow scrolling */
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  /* ✅ Add transitions for smooth theme change */
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  transition: background-color 0.3s, color 0.3s;
 }
 
 body::-webkit-scrollbar {

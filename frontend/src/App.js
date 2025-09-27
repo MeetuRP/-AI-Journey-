@@ -17,6 +17,9 @@ function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
 
+  // ✅ 1. Add state and toggle function for Dark Mode
+  const [isDarkMode, setIsDarkMode] = useState(() => localStorage.getItem('darkMode') === 'true');
+
   const recognitionRef = useRef(null);
   const audioRef = useRef(null);
   const chatEndRef = useRef(null);
@@ -27,9 +30,21 @@ function App() {
 
   useEffect(() => {
     if (chatEndRef.current) {
-      chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      chatEndRef.current.scrollIntoView({ behavior: 'smooth'});
     }
   }, [messages]);
+
+  // ✅ 2. Add useEffect to apply the theme and save the preference
+  useEffect(() => {
+    localStorage.setItem('darkMode', isDarkMode);
+    const appContainer = document.querySelector('.app-container');
+    if (isDarkMode) {
+      appContainer.classList.add('dark-mode');
+    } else {
+      appContainer.classList.remove('dark-mode');
+    }
+  }, [isDarkMode]);
+
 
   const fetchSessions = async () => {
     const res = await axios.get('http://localhost:8000/sessions');
@@ -106,15 +121,8 @@ function App() {
 
   const formatBotText = (text) => {
     if (!text) return '';
-
-    // Remove markdown headings
     text = text.replace(/^#+\s+/gm, '');
-    // Collapse multiple blank lines outside tables
-    // text = text.replace(/([^\S\r\n]*\n){2,}/g, '\n');
-
-    // Trim leading/trailing spaces inside table rows
     text = text.replace(/^\s*\|(.+)\|\s*$/gm, (line) => line.trim());
-
     const match = text.match(/^.*?[.?!,](\s|$)/);
     if (match) {
       const firstSentence = match[0].trim();
@@ -123,7 +131,6 @@ function App() {
     }
     return `<span class="highlight">${text}</span>`;
   };
-
 
   const handleSend = async (e) => {
     e.preventDefault();
@@ -213,27 +220,35 @@ function App() {
           <div className="header-info">
             <h2>--AI ChatBot--</h2>
           </div>
-          {/* Language Selector */}
-          <div className="language-menu-container">
-            <button
-              type="button"
-              className="language-toggle"
-              onClick={() => setShowLangMenu(!showLangMenu)}
-            >
-              🌐
+
+          {/* ✅ 3. Group header controls and add the dark mode button */}
+          <div className="header-controls">
+            <div className="language-menu-container">
+              <button
+                type="button"
+                className="language-toggle"
+                onClick={() => setShowLangMenu(!showLangMenu)}
+              >
+                🌐
+              </button>
+              {showLangMenu && (
+                <div className="language-menu">
+                  <button onClick={() => { setLanguage('en'); setShowLangMenu(false); }}>
+                    <b>English</b>
+                  </button>
+                  <button onClick={() => { setLanguage('hi'); setShowLangMenu(false); }}>
+                    <b>Hindi</b>
+                  </button>
+                </div>
+              )}
+            </div>
+            
+            <button className="dark-mode-toggle" onClick={() => setIsDarkMode(!isDarkMode)}>
+              {isDarkMode ? '☀️' : '🌙'}
             </button>
-            {showLangMenu && (
-              <div className="language-menu">
-                <button onClick={() => { setLanguage('en'); setShowLangMenu(false); }}>
-                  <b>English</b>
-                </button>
-                <button onClick={() => { setLanguage('hi'); setShowLangMenu(false); }}>
-                  <b>Hindi</b>
-                </button>
-              </div>
-            )}
+
+            <div className="msg-count"><button>💬 {messages.length}</button></div>
           </div>
-          <div className="msg-count"><button>💬 {messages.length}</button></div>
         </div>
 
         {/* Messages */}

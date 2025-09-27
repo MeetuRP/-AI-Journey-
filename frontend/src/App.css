@@ -1,17 +1,18 @@
+/* ✅ 2. Apply CSS variables throughout the file */
 .app-container {
   display: flex;
   height: 100vh;
-  background: #f0f2f5;
+  background: var(--bg-main);
 }
 
 /* Sidebar */
 .sidebar {
-  background: white;
-  border-right: 1px solid #ddd;
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border-color);
   width: 250px;
   transition: width 0.2s ease;
   overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px var(--shadow-color);
 }
 .sidebar.open {
   width: 250px;
@@ -21,8 +22,8 @@
 }
 .sidebar-header {
   padding: 1rem;
-  border-bottom: 1px solid #eee;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid var(--border-color-header);
+  box-shadow: 0 2px 4px var(--shadow-color);
 }
 .new-session-btn {
   width: 100%;
@@ -37,16 +38,17 @@
   padding: 0.5rem;
 }
 .session-item {
+  color: var(--text-main);
   padding: 0.5rem 1rem;
   border-radius: 6px;
   cursor: pointer;
 }
 .session-item:hover {
-  background: #f0f0f0;
+  background: var(--bg-session-item-hover);
 }
 .session-item.active {
-  background: #dbeafe;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: var(--bg-session-item-active);
+  box-shadow: 0 2px 4px var(--shadow-color);
 }
 
 /* Chat Main */
@@ -61,14 +63,15 @@
   align-items: center;
   gap: 0.3rem;
   justify-content: space-between;
-  background: white;
+  background: var(--bg-header);
   padding: 0.8rem 1rem;
-  border-bottom: 1px solid #ddd;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: 0 2px 4px var(--shadow-color);
 }
 .sidebar-toggle {
   border: none;
-  background: #f3f4f6;
+  background: var(--bg-button);
+  color: var(--text-main);
   padding: 0.4rem 1rem;
   border-radius: 8px;
   cursor: pointer;
@@ -77,59 +80,77 @@
   flex: 1;
   margin-left: 1rem;
 }
-/* Language Menu */
-.language-menu-container {
-  position: relative;
+.header-info h2 {
+  color: var(--text-main);
+  margin: 0; /* Good practice to remove default h2 margin */
 }
 
-.language-toggle {
+/* ✅ 3. Add styles for header controls container and dark mode button */
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dark-mode-toggle {
   border: none;
-  background: #f3f4f6;
+  background: var(--bg-button);
+  color: var(--text-main);
   padding: 0.4rem 1rem;
   border-radius: 8px;
   cursor: pointer;
 }
 
+
+/* Language Menu */
+.language-menu-container {
+  position: relative;
+}
+.language-toggle {
+  border: none;
+  background: var(--bg-button);
+  color: var(--text-main);
+  padding: 0.4rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
 .language-menu {
   position: absolute;
   top: 165%;
   right: -30px;
-  background: #eff6ff;
-  border: 1px solid #ddd;
-  font-style: #1f549a;
+  background: var(--bg-menu);
+  border: 1px solid var(--border-color);
   border-radius: 10px;
-  box-shadow: 0px 2px 8px rgba(0,0,0,0.15);
+  box-shadow: 0px 2px 8px var(--shadow-color);
   padding: 1rem;
   display: inline-flex;
   flex-direction: column;
   width: 70px;
   margin-bottom: 17px;
 }
-
 .language-menu button {
   background: none;
   border: none;
   padding: 0.4rem 0.6rem;
   text-align: left;
   cursor: pointer;
-  background: #eff6ff;
-  color: #0b3a75;
+  background: var(--bg-menu);
+  color: var(--text-menu);
   transition: background 0.1s ease, color 0.2s ease, transform 0.08s ease;
   border-radius: 8px;
 }
-
 .language-menu button:hover {
-  background: #1f549a;
-  color: rgb(255, 255, 255);
+  background: var(--bg-menu-hover);
+  color: var(--text-menu-hover);
 }
 
 .msg-count {
   font-size: 0.9rem;
 }
-
 .msg-count button {
   border: none;
-  background: #f3f4f6;
+  background: var(--bg-button);
+  color: var(--text-main);
   padding: 0.4rem 1rem;
   border-radius: 8px;
   cursor: pointer;
@@ -140,6 +161,11 @@
   flex: 1;
   overflow-y: auto;
   padding: 1rem;
+  background: var(--bg-chat-messages);
+  /* hidden scrollbar but allow scrolling */
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 .message-bubble {
   max-width: 75%;
@@ -159,54 +185,31 @@
   font-size: 1rem; /* same as normal text */
   font-weight: bold;
 }
-
-.message-bubble.user {
-  background: linear-gradient(90deg, #4a90e2, #357abd);
-  color: white;
-  margin-left: auto;
-
-}
-.message-bubble.bot {
-  background: white;
-  border: 1px solid #ddd;
-}
-
-/* Remove extra space in markdown paragraphs & tables */
 .message-bubble p {
   margin: 0 !important;
 }
-
-/* Collapse runs of <br> in markdown output */
 .message-bubble br + br {
   display: none;
 }
-
-/* Remove top/bottom gap from first & last markdown block in bubble */
 .message-bubble > :first-child { margin-top: 10px !important; }
 .message-bubble > :last-child  { margin-bottom: 10px !important; }
-
-/* NEW: Remove margin from element before a table */
 .message-bubble *:has(+ table) {
   margin-bottom: 0 !important;
 }
-
-/* Table styling for bot responses */
 .message-bubble table {
   margin-top: -105em !important;
   margin-bottom: 0 !important;
   border-collapse: collapse;
-  background: white;
+  background: var(--bg-header); /* Use header bg for tables */
 }
-
 .message-bubble table th,
 .message-bubble table td {
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color);
   padding: 6px 10px;
   text-align: left;
 }
-
 .message-bubble table th {
-  background: #f3f4f6;
+  background: var(--bg-button);
   font-weight: bold;
 }
 
@@ -218,7 +221,7 @@
 }
 .typing-text {
   font-size: 0.85rem;
-  color: #555;
+  color: var(--text-typing);
 }
 .dot {
   width: 6px;
@@ -242,18 +245,20 @@
 .chat-input-area {
   display: flex;
   padding: 1rem 1rem;
-  border-top: 1px solid #ddd;
-  background: white;
-  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-input-area);
+  box-shadow: 0 -2px 4px var(--shadow-color);
 }
 .chat-input-area input {
   flex: 1;
   padding: 0.5rem;
   border: none;
   outline: none;
-  border: 1px solid #d1d5db;
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  border: 1px solid var(--border-color-input);
   border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px var(--shadow-color);
 }
 .input-buttons {
   display: flex;
@@ -261,27 +266,27 @@
   gap: 0.3rem;
   padding: 0.4rem 1rem;
   font-family: 'Roboto', sans-serif;
-  color: #000000;
+  color: var(--text-main);
 }
 .input-buttons button {
   border: none;
-  background: #f3f4f6;
+  background: var(--bg-button);
+  color: var(--text-main);
   padding: 0.4rem 1rem;
   border-radius: 8px;
   cursor: pointer;
 }
 .input-buttons button:hover {
-  background: #dbeafe;
+  background: var(--bg-button-hover);
 }
-/* SEND button */
 .input-buttons .send-button {
-  background: #eff6ff;
-  color: #0b3a75;
+  background: var(--bg-send-button);
+  color: var(--text-send-button);
   transition: background 0.2s ease, color 0.2s ease, transform 0.08s ease;
 }
 .input-buttons .send-button:hover {
-  background: #1f549a;
-  color: #fff;
+  background: var(--bg-send-button-hover);
+  color: var(--text-send-button-hover);
   transform: scale(1.02);
 }
 .input-buttons .send-button b {
@@ -296,11 +301,10 @@
   position: absolute;
   bottom: 120%;
   right: -70px;
-  background: #eff6ff;
-  border: 1px solid #ddd;
-  font-style: #1f549a;
+  background: var(--bg-menu);
+  border: 1px solid var(--border-color);
   border-radius: 10px;
-  box-shadow: 0px 2px 8px rgba(0,0,0,0.15);
+  box-shadow: 0px 2px 8px var(--shadow-color);
   padding: 1rem;
   display: inline-flex;
   flex-direction: column;
@@ -313,23 +317,13 @@
   padding: 0.4rem 0.6rem;
   text-align: left;
   cursor: pointer;
-  background: #eff6ff;
-  color: #0b3a75;
+  background: var(--bg-menu);
+  color: var(--text-menu);
   transition: background 0.1s ease, color 0.2s ease, transform 0.08s ease;
 }
 .more-menu button:hover {
-  background: #1f549a;
-  color: rgb(255, 255, 255);
-}
-
-/* Language selector */
-.language-selector {
-  padding: 1rem 1rem;
-  border-top: 1px solid #eee;
-  background: white;
-}
-.language-selector select {
-  margin-left: 0.5rem;
+  background: var(--bg-menu-hover);
+  color: var(--text-menu-hover);
 }
 
 .message-row {
@@ -349,9 +343,6 @@
   white-space: pre-wrap;
   word-wrap: break-word;
 }
-.message-bubble p {
-  margin: 0 !important;
-}
 .message-bubble ul {
   list-style-type: disc;
   margin-left: 20px;
@@ -365,13 +356,12 @@
 }
 
 .user-bubble {
-  background: #5894da;
-  color: white;
-  box-shadow: -10px 0px 10px 1px rgba(0, 0, 0, 0.1);
+  background: var(--bg-user-bubble);
+  color: var(--text-light);
+  box-shadow: -10px 0px 10px 1px var(--shadow-color);
 }
 .bot-bubble {
-  background: #e8f5ed;
-  color: black;
-  box-shadow: 10px 0px 10px -1px rgba(0, 0, 0, 0.1);
+  background: var(--bg-bot-bubble);
+  color: var(--text-main);
+  box-shadow: 10px 0px 10px -1px var(--shadow-color);
 }
-/*6894f4*/
