@@ -97,7 +97,7 @@ def build_combined_rag_chain(question: str, pdf_path: str = None, web_text: str 
 
     # 🧠 LLM
     llm = ChatOpenAI(
-        model="llama3-70b-8192",
+        model="llama-3.1-8b-instant",
         base_url="https://api.groq.com/openai/v1",
         openai_api_key=openai_api_key
     )
